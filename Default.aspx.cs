@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OfficeOpenXml;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Configuration;
@@ -27,196 +28,196 @@ namespace ChoiceDealing
 
         private void ShowGrid()
         {
-            //try
-            //{
-            //    DataSet dts = new DataSet();
+            try
+            {
+                DataSet dts = new DataSet();
 
-            //    SqlParameter[] para = new SqlParameter[1];
-            //    para[0] = new SqlParameter("@Option", "ORMVIEW");
+                SqlParameter[] para = new SqlParameter[1];
+                para[0] = new SqlParameter("@option", "ormview");
 
-            //    dts = DBWrapper.ReturnDS(para, "[LKP_Middleware_Config].[dbo].[usp_InstiEXCEL]");
-            //    if (dts.Tables.Count > 0)
-            //    {
-            //        Moti_ORMSReport.DataSource = dts;
-            //        Moti_ORMSReport.DataBind();
-            //        Moti_ORMSReport.Visible = true;
-            //    }
-            //}
-            //catch (Exception ex)
-            //{
-            //    throw ex;
-            //}
+                dts = DBWrapper.ReturnDS(para, "[lkp_middleware_config].[dbo].[usp_instiexcel]");
+                if (dts.Tables.Count > 0)
+                {
+                    Moti_ORMSReport.DataSource = dts;
+                    Moti_ORMSReport.DataBind();
+                    Moti_ORMSReport.Visible = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
 
         protected void btnUpload_Click(object sender, EventArgs e)
         {
-            //try
-            //{
-            //    if (lblMotiEQFile.HasFile && fileUpload.HasFile)
-            //    {
-            //        // Set EPPlus license
-            //        ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+            try
+            {
+                if (lblMotiEQFile.HasFile && fileUpload.HasFile)
+                {
+                    // Set EPPlus license
+                    ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
 
-            //        // Save and process lblMotiEQFile (EQT file)
-            //        string eqtFileName = Path.GetFileName(lblMotiEQFile.PostedFile.FileName);
-            //        string eqtFilePath = Server.MapPath("~/CTCL_Certificates/" + eqtFileName);
-            //        lblMotiEQFile.SaveAs(eqtFilePath);
+                    // Save and process lblMotiEQFile (EQT file)
+                    string eqtFileName = Path.GetFileName(lblMotiEQFile.PostedFile.FileName);
+                    string eqtFilePath = Server.MapPath("~/CTCL_Certificates/" + eqtFileName);
+                    lblMotiEQFile.SaveAs(eqtFilePath);
 
-            //        DataTable formattedTable = new DataTable();
-            //        using (var package = new ExcelPackage(new FileInfo(eqtFilePath)))
-            //        {
-            //            var worksheet = package.Workbook.Worksheets[0];
-            //            int colCount = worksheet.Dimension.End.Column;
-            //            int rowCount = worksheet.Dimension.End.Row;
+                    DataTable formattedTable = new DataTable();
+                    using (var package = new ExcelPackage(new FileInfo(eqtFilePath)))
+                    {
+                        var worksheet = package.Workbook.Worksheets[0];
+                        int colCount = worksheet.Dimension.End.Column;
+                        int rowCount = worksheet.Dimension.End.Row;
 
-            //            Dictionary<string, int> columnIndexes = new Dictionary<string, int>();
+                        Dictionary<string, int> columnIndexes = new Dictionary<string, int>();
 
-            //            // Dynamically add columns from the header row
-            //            for (int col = 1; col <= colCount; col++)
-            //            {
-            //                string header = worksheet.Cells[1, col].Text?.Trim();
-            //                if (!string.IsNullOrEmpty(header) && !formattedTable.Columns.Contains(header))
-            //                {
-            //                    columnIndexes[header] = col;
-            //                    formattedTable.Columns.Add(header);
-            //                }
-            //            }
+                        // Dynamically add columns from the header row
+                        for (int col = 1; col <= colCount; col++)
+                        {
+                            string header = worksheet.Cells[1, col].Text?.Trim();
+                            if (!string.IsNullOrEmpty(header) && !formattedTable.Columns.Contains(header))
+                            {
+                                columnIndexes[header] = col;
+                                formattedTable.Columns.Add(header);
+                            }
+                        }
 
-            //            // Fill the DataTable with data from the sheet
-            //            for (int row = 2; row <= rowCount; row++)
-            //            {
-            //                DataRow dr = formattedTable.NewRow();
-            //                foreach (var kvp in columnIndexes)
-            //                {
-            //                    string colName = kvp.Key;
-            //                    int colIndex = kvp.Value;
-            //                    dr[colName] = worksheet.Cells[row, colIndex].Text?.Trim();
-            //                }
-            //                formattedTable.Rows.Add(dr);
-            //            }
-            //        }
+                        // Fill the DataTable with data from the sheet
+                        for (int row = 2; row <= rowCount; row++)
+                        {
+                            DataRow dr = formattedTable.NewRow();
+                            foreach (var kvp in columnIndexes)
+                            {
+                                string colName = kvp.Key;
+                                int colIndex = kvp.Value;
+                                dr[colName] = worksheet.Cells[row, colIndex].Text?.Trim();
+                            }
+                            formattedTable.Rows.Add(dr);
+                        }
+                    }
 
-            //        using (SqlConnection connection = new SqlConnection(ConfigurationManager.ConnectionStrings["ConnMiddleWare"].ConnectionString))
-            //        {
-            //            connection.Open();
-            //            SqlCommand truncateCmd = new SqlCommand("TRUNCATE TABLE tbl_MotiORMExcel", connection);
-            //            truncateCmd.ExecuteNonQuery();
+                    using (SqlConnection connection = new SqlConnection(ConfigurationManager.ConnectionStrings["ConnMiddleWare"].ConnectionString))
+                    {
+                        connection.Open();
+                        SqlCommand truncateCmd = new SqlCommand("TRUNCATE TABLE tbl_MotiORMExcel", connection);
+                        truncateCmd.ExecuteNonQuery();
 
-            //            foreach (DataRow row in formattedTable.Rows)
-            //            {
-            //                MotiEQExcel instiMain = new MotiEQExcel
-            //                {
-            //                    Date = row[0]?.ToString(),
-            //                    BuySell = row[1]?.ToString(),
-            //                    ScripName = row[2]?.ToString(),
-            //                    ISIN = row[3]?.ToString(),
-            //                    Exchange = row[4]?.ToString(),
-            //                    Qty = row[5]?.ToString(),
-            //                    MarketPrice = row[6]?.ToString(),
-            //                    BrokerSEBINo = row[7]?.ToString(),
-            //                    Scheme = row[8]?.ToString(),
-            //                    UCC = row[9]?.ToString(),
-            //                    Brokerage = row[10]?.ToString(),
-            //                    STT_Amt = row[11]?.ToString(),
-            //                    NetAmount = row[12]?.ToString(),
-            //                    AssetClass = row[13]?.ToString(),
-            //                    YTM = row[14]?.ToString(),
-            //                    InstrumentHoldingType = row[15]?.ToString(),
-            //                    FXRate = row[16]?.ToString(),
-            //                    AccruedInterest = row[17]?.ToString(),
-            //                    CounterPartyShortName = row[18]?.ToString()
-            //                };
+                        foreach (DataRow row in formattedTable.Rows)
+                        {
+                            MotiEQExcel instiMain = new MotiEQExcel
+                            {
+                                Date = row[0]?.ToString(),
+                                BuySell = row[1]?.ToString(),
+                                ScripName = row[2]?.ToString(),
+                                ISIN = row[3]?.ToString(),
+                                Exchange = row[4]?.ToString(),
+                                Qty = row[5]?.ToString(),
+                                MarketPrice = row[6]?.ToString(),
+                                BrokerSEBINo = row[7]?.ToString(),
+                                Scheme = row[8]?.ToString(),
+                                UCC = row[9]?.ToString(),
+                                Brokerage = row[10]?.ToString(),
+                                STT_Amt = row[11]?.ToString(),
+                                NetAmount = row[12]?.ToString(),
+                                AssetClass = row[13]?.ToString(),
+                                YTM = row[14]?.ToString(),
+                                InstrumentHoldingType = row[15]?.ToString(),
+                                FXRate = row[16]?.ToString(),
+                                AccruedInterest = row[17]?.ToString(),
+                                CounterPartyShortName = row[18]?.ToString()
+                            };
 
-            //                MotiORMEq(instiMain);
-            //            }
-            //        }
+                            MotiORMEq(instiMain);
+                        }
+                    }
 
-            //        File.Delete(eqtFilePath);
-            //        ClientScript.RegisterStartupScript(this.GetType(), "alert", "alert('File Uploaded!');", true);
+                    File.Delete(eqtFilePath);
+                    ClientScript.RegisterStartupScript(this.GetType(), "alert", "alert('File Uploaded!');", true);
 
-            //        // Process fileUpload (OMS file)
-            //        string omsFileName = Path.GetFileName(fileUpload.PostedFile.FileName);
-            //        string omsFilePath = Server.MapPath("~/CTCL_Certificates/" + omsFileName);
-            //        fileUpload.SaveAs(omsFilePath);
-            //        ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-            //        DataTable omsTable = new DataTable();
-            //        using (var package = new ExcelPackage(new FileInfo(omsFilePath)))
-            //        {
-            //            var worksheet = package.Workbook.Worksheets[0];
-            //            int colCount = worksheet.Dimension.End.Column;
-            //            int rowCount = worksheet.Dimension.End.Row;
+                    // Process fileUpload (OMS file)
+                    string omsFileName = Path.GetFileName(fileUpload.PostedFile.FileName);
+                    string omsFilePath = Server.MapPath("~/CTCL_Certificates/" + omsFileName);
+                    fileUpload.SaveAs(omsFilePath);
+                    ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
+                    DataTable omsTable = new DataTable();
+                    using (var package = new ExcelPackage(new FileInfo(omsFilePath)))
+                    {
+                        var worksheet = package.Workbook.Worksheets[0];
+                        int colCount = worksheet.Dimension.End.Column;
+                        int rowCount = worksheet.Dimension.End.Row;
 
-            //            for (int col = 1; col <= colCount; col++)
-            //            {
-            //                string header = worksheet.Cells[1, col].Text?.Trim();
-            //                if (!string.IsNullOrEmpty(header))
-            //                    omsTable.Columns.Add(header);
-            //                else
-            //                    omsTable.Columns.Add("Column" + col); // Fallback if header is empty
-            //            }
+                        for (int col = 1; col <= colCount; col++)
+                        {
+                            string header = worksheet.Cells[1, col].Text?.Trim();
+                            if (!string.IsNullOrEmpty(header))
+                                omsTable.Columns.Add(header);
+                            else
+                                omsTable.Columns.Add("Column" + col); // Fallback if header is empty
+                        }
 
-            //            for (int row = 2; row <= rowCount; row++)
-            //            {
-            //                bool isEmptyRow = true;
-            //                DataRow dr = omsTable.NewRow();
+                        for (int row = 2; row <= rowCount; row++)
+                        {
+                            bool isEmptyRow = true;
+                            DataRow dr = omsTable.NewRow();
 
-            //                for (int col = 1; col <= colCount; col++)
-            //                {
-            //                    var cellValue = worksheet.Cells[row, col]?.Text?.Trim();
-            //                    if (!string.IsNullOrEmpty(cellValue))
-            //                        isEmptyRow = false;
+                            for (int col = 1; col <= colCount; col++)
+                            {
+                                var cellValue = worksheet.Cells[row, col]?.Text?.Trim();
+                                if (!string.IsNullOrEmpty(cellValue))
+                                    isEmptyRow = false;
 
-            //                    dr[col - 1] = cellValue;
-            //                }
+                                dr[col - 1] = cellValue;
+                            }
 
-            //                if (isEmptyRow)
-            //                    break; // Stop processing if entire row is empty
+                            if (isEmptyRow)
+                                break; // Stop processing if entire row is empty
 
-            //                omsTable.Rows.Add(dr);
-            //            }
+                            omsTable.Rows.Add(dr);
+                        }
 
-            //        }
+                    }
 
-            //        using (SqlConnection connection = new SqlConnection(ConfigurationManager.ConnectionStrings["ConnMiddleWare"].ConnectionString))
-            //        {
-            //            connection.Open();
-            //            SqlCommand truncateCmd = new SqlCommand("TRUNCATE TABLE MotiEQExcel", connection);
-            //            truncateCmd.ExecuteNonQuery();
+                    using (SqlConnection connection = new SqlConnection(ConfigurationManager.ConnectionStrings["ConnMiddleWare"].ConnectionString))
+                    {
+                        connection.Open();
+                        SqlCommand truncateCmd = new SqlCommand("TRUNCATE TABLE MotiEQExcel", connection);
+                        truncateCmd.ExecuteNonQuery();
 
-            //            foreach (DataRow row in omsTable.Rows)
-            //            {
-            //                MotiORMExcel instiMain = new MotiORMExcel
-            //                {
-            //                    Exchange = row["Exchange"]?.ToString(),
-            //                    Sub_Ac_Code_Client_Id = row["Sub A/c Code/Client Id"]?.ToString(),
-            //                    Sub_Ac_Name = row["Sub A/c Name"]?.ToString(),
-            //                    Scrip_Name = row["Scrip Name"]?.ToString(),
-            //                    Buy_Sell = row["Buy/Sell"]?.ToString(),
-            //                    Order_Type = row["Order Type"]?.ToString(),
-            //                    Order_Qty = row["Order Qty"]?.ToString(),
-            //                    ISIN_Code = row["ISIN Code"]?.ToString(),
-            //                    Settlor_NSE = row["Settlor (NSE)"]?.ToString(),
-            //                    OMSID = row["OMSID"]?.ToString(),
-            //                    Date = row["Date"]?.ToString(),
-            //                    Mapped_Scrip_Code = row["Mapped Scrip Code"]?.ToString()
-            //                };
+                        foreach (DataRow row in omsTable.Rows)
+                        {
+                            MotiORMExcel instiMain = new MotiORMExcel
+                            {
+                                Exchange = row["Exchange"]?.ToString(),
+                                Sub_Ac_Code_Client_Id = row["Sub A/c Code/Client Id"]?.ToString(),
+                                Sub_Ac_Name = row["Sub A/c Name"]?.ToString(),
+                                Scrip_Name = row["Scrip Name"]?.ToString(),
+                                Buy_Sell = row["Buy/Sell"]?.ToString(),
+                                Order_Type = row["Order Type"]?.ToString(),
+                                Order_Qty = row["Order Qty"]?.ToString(),
+                                ISIN_Code = row["ISIN Code"]?.ToString(),
+                                Settlor_NSE = row["Settlor (NSE)"]?.ToString(),
+                                OMSID = row["OMSID"]?.ToString(),
+                                Date = row["Date"]?.ToString(),
+                                Mapped_Scrip_Code = row["Mapped Scrip Code"]?.ToString()
+                            };
 
-            //                MotiEq(instiMain);
-            //            }
-            //        }
+                            MotiEq(instiMain);
+                        }
+                    }
 
-            //        File.Delete(omsFilePath);
-            //        ClientScript.RegisterStartupScript(this.GetType(), "alert", "alert('File Uploaded!');", true);
-            //    }
-            //    else
-            //    {
-            //        ClientScript.RegisterStartupScript(this.GetType(), "alert", "alert('Please select the files for uploading!');", true);
-            //    }
-            //}
-            //catch (Exception ex)
-            //{
-            //    ScriptManager.RegisterStartupScript(this, GetType(), "alertMessage", $"alert('Error: {ex.Message}');", true);
-            //}
+                    File.Delete(omsFilePath);
+                    ClientScript.RegisterStartupScript(this.GetType(), "alert", "alert('File Uploaded!');", true);
+                }
+                else
+                {
+                    ClientScript.RegisterStartupScript(this.GetType(), "alert", "alert('Please select the files for uploading!');", true);
+                }
+            }
+            catch (Exception ex)
+            {
+                ScriptManager.RegisterStartupScript(this, GetType(), "alertMessage", $"alert('Error: {ex.Message}');", true);
+            }
         }
 
         public DataTable MotiORMEq(MotiEQExcel motiEQExcel)
@@ -468,67 +469,67 @@ namespace ChoiceDealing
         }
         protected void btnDownload_Click(object sender, EventArgs e)
         {
-            //try
-            //{
-            //    DataSet dts = new DataSet();
+            try
+            {
+                DataSet dts = new DataSet();
 
-            //    SqlParameter[] para = new SqlParameter[1];
-            //    para[0] = new SqlParameter("@Option", "ORMDOWNLOAD");
+                SqlParameter[] para = new SqlParameter[1];
+                para[0] = new SqlParameter("@Option", "ORMDOWNLOAD");
 
-            //    dts = DBWrapper.ReturnDS(para, "[LKP_Middleware_Config].[dbo].[usp_InstiEXCEL]");
-            //    if (dts.Tables.Count > 0 && dts.Tables[0].Rows.Count > 0)
-            //    {
-            //        ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
-            //        using (var package = new OfficeOpenXml.ExcelPackage()) // EPPlus Library
-            //        {
-            //            ExcelWorksheet worksheet = package.Workbook.Worksheets.Add("Sheet1");
-            //            worksheet.Cells.LoadFromDataTable(dts.Tables[0], true); // Load data
+                dts = DBWrapper.ReturnDS(para, "[LKP_Middleware_Config].[dbo].[usp_InstiEXCEL]");
+                if (dts.Tables.Count > 0 && dts.Tables[0].Rows.Count > 0)
+                {
+                    ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
+                    using (var package = new OfficeOpenXml.ExcelPackage()) // EPPlus Library
+                    {
+                        ExcelWorksheet worksheet = package.Workbook.Worksheets.Add("Sheet1");
+                        worksheet.Cells.LoadFromDataTable(dts.Tables[0], true); // Load data
 
-            //            Response.Clear();
-            //            Response.ContentType = "text/csv";
-            //            Response.AddHeader("content-disposition", "attachment; filename=MotiEQOMSFile.csv");
+                        Response.Clear();
+                        Response.ContentType = "text/csv";
+                        Response.AddHeader("content-disposition", "attachment; filename=MotiEQOMSFile.csv");
 
-            //            System.Text.StringBuilder csvContent = new StringBuilder();
-            //            DataTable dt = dts.Tables[0];
-            //            for (int i = 0; i < dt.Columns.Count; i++)
-            //            {
-            //                csvContent.Append(dt.Columns[i].ColumnName);
-            //                if (i < dt.Columns.Count - 1)
-            //                    csvContent.Append(",");
-            //            }
-            //            csvContent.AppendLine();
-            //            foreach (DataRow row in dt.Rows)
-            //            {
-            //                for (int i = 0; i < dt.Columns.Count; i++)
-            //                {
-            //                    csvContent.Append(row[i]?.ToString().Replace(",", " ")); // Prevent CSV format issues
-            //                    if (i < dt.Columns.Count - 1)
-            //                        csvContent.Append(",");
-            //                }
-            //                csvContent.AppendLine();
-            //            }
-            //            //using (var stream = new MemoryStream())
-            //            //{
-            //            //    package.SaveAs(stream);
-            //            //    stream.WriteTo(Response.OutputStream);
-            //            //}
-            //            byte[] csvBytes = Encoding.UTF8.GetBytes(csvContent.ToString());
+                        System.Text.StringBuilder csvContent = new StringBuilder();
+                        DataTable dt = dts.Tables[0];
+                        for (int i = 0; i < dt.Columns.Count; i++)
+                        {
+                            csvContent.Append(dt.Columns[i].ColumnName);
+                            if (i < dt.Columns.Count - 1)
+                                csvContent.Append(",");
+                        }
+                        csvContent.AppendLine();
+                        foreach (DataRow row in dt.Rows)
+                        {
+                            for (int i = 0; i < dt.Columns.Count; i++)
+                            {
+                                csvContent.Append(row[i]?.ToString().Replace(",", " ")); // Prevent CSV format issues
+                                if (i < dt.Columns.Count - 1)
+                                    csvContent.Append(",");
+                            }
+                            csvContent.AppendLine();
+                        }
+                        //using (var stream = new MemoryStream())
+                        //{
+                        //    package.SaveAs(stream);
+                        //    stream.WriteTo(Response.OutputStream);
+                        //}
+                        byte[] csvBytes = Encoding.UTF8.GetBytes(csvContent.ToString());
 
-            //            Response.OutputStream.Write(csvBytes, 0, csvBytes.Length);
-            //            Response.Flush();
-            //            Response.End();
-            //        }
-            //    }
-            //    else
-            //    {
-            //        // Show message if no data found
-            //        ScriptManager.RegisterStartupScript(this, GetType(), "alertMessage", "alert('No data found to export!');", true);
-            //    }
-            //}
-            //catch (Exception ex)
-            //{
-            //    ScriptManager.RegisterStartupScript(this, GetType(), "alertMessage", "alert('" + ex + "');", true);
-            //}
+                        Response.OutputStream.Write(csvBytes, 0, csvBytes.Length);
+                        Response.Flush();
+                        Response.End();
+                    }
+                }
+                else
+                {
+                    // Show message if no data found
+                    ScriptManager.RegisterStartupScript(this, GetType(), "alertMessage", "alert('No data found to export!');", true);
+                }
+            }
+            catch (Exception ex)
+            {
+                ScriptManager.RegisterStartupScript(this, GetType(), "alertMessage", "alert('" + ex + "');", true);
+            }
         }
     }
 }

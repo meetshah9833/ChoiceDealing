@@ -36,12 +36,12 @@ namespace ChoiceDealing
                     }
                     else
                     {
-                        CurrYear = "Conn2";
+                        CurrYear = "ConnMiddleWare";
                     }
                 }
                 else if (HttpContext.Current.Session == null)
                 {
-                    CurrYear = "Conn2";
+                    CurrYear = "ConnMiddleWare  ";
                 }
 
                 return new SqlConnection(System.Configuration.ConfigurationManager.ConnectionStrings[CurrYear].ToString());

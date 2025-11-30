@@ -11,6 +11,7 @@ using System.Text;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
+using LicenseContext = OfficeOpenXml.LicenseContext;
 
 namespace ChoiceDealing
 {
@@ -35,7 +36,7 @@ namespace ChoiceDealing
                 SqlParameter[] para = new SqlParameter[1];
                 para[0] = new SqlParameter("@option", "ormview");
 
-                dts = DBWrapper.ReturnDS(para, "[lkp_middleware_config].[dbo].[usp_instiexcel]");
+                dts = DBWrapper.ReturnDS(para, "usp_InstiEXCEL");
                 if (dts.Tables.Count > 0)
                 {
                     Moti_ORMSReport.DataSource = dts;
@@ -55,12 +56,11 @@ namespace ChoiceDealing
             {
                 if (lblMotiEQFile.HasFile && fileUpload.HasFile)
                 {
-                    // Set EPPlus license
-                    ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
+                    ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 
                     // Save and process lblMotiEQFile (EQT file)
                     string eqtFileName = Path.GetFileName(lblMotiEQFile.PostedFile.FileName);
-                    string eqtFilePath = Server.MapPath("~/CTCL_Certificates/" + eqtFileName);
+                    string eqtFilePath = Server.MapPath("~/FileUploads/" + eqtFileName);
                     lblMotiEQFile.SaveAs(eqtFilePath);
 
                     DataTable formattedTable = new DataTable();
@@ -137,9 +137,9 @@ namespace ChoiceDealing
 
                     // Process fileUpload (OMS file)
                     string omsFileName = Path.GetFileName(fileUpload.PostedFile.FileName);
-                    string omsFilePath = Server.MapPath("~/CTCL_Certificates/" + omsFileName);
+                    string omsFilePath = Server.MapPath("~/FileUploads/" + omsFileName);
                     fileUpload.SaveAs(omsFilePath);
-                    ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
+                    ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
                     DataTable omsTable = new DataTable();
                     using (var package = new ExcelPackage(new FileInfo(omsFilePath)))
                     {

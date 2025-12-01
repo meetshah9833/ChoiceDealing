@@ -7,6 +7,7 @@ using System.Data.SqlClient;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
@@ -23,9 +24,31 @@ namespace ChoiceDealing
 
         protected void btnView_Click(object sender, EventArgs e)
         {
-
+            ShowGrid();
         }
 
+        private void ShowGrid()
+        {
+            try
+            {
+                DataSet dts = new DataSet();
+
+                SqlParameter[] para = new SqlParameter[1];
+                para[0] = new SqlParameter("@OPTION", "DSPVIEW");
+
+                dts = DBWrapper.ReturnDS(para, "proc_DSP");
+                if (dts.Tables.Count > 0)
+                {
+                    DSPReport.DataSource = dts;
+                    DSPReport.DataBind();
+                    DSPReport.Visible = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
         protected void btnUpload_Click(object sender, EventArgs e)
         {
             try
@@ -185,7 +208,47 @@ namespace ChoiceDealing
         }
         protected void btnDownload_Click(object sender, EventArgs e)
         {
+            try
+            {
+                DataSet dts = new DataSet();
 
+                SqlParameter[] para = new SqlParameter[1];
+                para[0] = new SqlParameter("@Option", "VIEW");
+
+                dts = DBWrapper.ReturnDS(para, "proc_DSP");
+                if (dts.Tables.Count > 0 && dts.Tables[0].Rows.Count > 0)
+                {
+                    ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
+                    using (var package = new OfficeOpenXml.ExcelPackage()) // EPPlus Library
+                    {
+                        ExcelWorksheet worksheet = package.Workbook.Worksheets.Add("Sheet1");
+                        worksheet.Cells.LoadFromDataTable(dts.Tables[0], true); // Load data
+
+                        Response.Clear();
+                        //Response.ContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+                        Response.ContentType = "text/csv";
+                        Response.AddHeader("content-disposition", "attachment; filename=DSPFile.csv");
+
+                        using (var stream = new MemoryStream())
+                        {
+                            package.SaveAs(stream);
+                            stream.WriteTo(Response.OutputStream);
+                        }
+
+                        Response.Flush();
+                        Response.End();
+                    }
+                }
+                else
+                {
+                    // Show message if no data found
+                    ScriptManager.RegisterStartupScript(this, GetType(), "alertMessage", "alert('No data found to export!');", true);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
 
         public DataTable ExecuteStoredProcedure(string SqlConnection, SqlCommand command)
@@ -248,6 +311,181 @@ namespace ChoiceDealing
             public string INITIALQUANTITY { get; set; }
             public string Qty { get; set; }
             public string Linecount { get; set; }
+        }
+
+        protected void DSPReport_RowDataBound(object sender, GridViewRowEventArgs e)
+        {
+            if (e.Row.RowType == DataControlRowType.DataRow)
+            {
+                DropDownList ddlBuySell = (DropDownList)e.Row.FindControl("ddlBuySell");
+                TextBox txtClientCode = (TextBox)e.Row.FindControl("txtClientcode");
+                TextBox txtNoofBaskets = (TextBox)e.Row.FindControl("txtNoofBaskets");
+
+                // Assuming SCHEMENAME is the second column (index 1), or you can use DataBinder
+                string buySellValue = DataBinder.Eval(e.Row.DataItem, "SCHEMENAME")?.ToString();
+
+                if (!string.IsNullOrEmpty(buySellValue) && (buySellValue == "B" || buySellValue == "S"))
+                {
+                    ddlBuySell.SelectedValue = buySellValue;
+                }
+
+                bool isRowEdited = (Convert.ToInt32(txtNoofBaskets.Text) > 1) ? true : false;
+
+                // Access the Download button (ButtonField becomes LinkButton in Controls[0] of the cell)
+                if (isRowEdited)
+                {
+                    // Adjust cell index if your ButtonField is not the first column (e.g. use correct column index)
+                    LinkButton lnkDownload = e.Row.Cells[9].Controls[0] as LinkButton;
+                    if (lnkDownload != null)
+                    {
+                        lnkDownload.BackColor = System.Drawing.Color.Yellow;
+                    }
+                }
+            }
+        }
+
+        protected void DSPReport_RowCommand(object sender, GridViewCommandEventArgs e)
+        {
+            try
+            {
+                if (e.CommandName == "View")
+                {
+                    // Ensure the row index is available
+                    int rowIndex = Convert.ToInt32(e.CommandArgument);
+
+                    // Access the correct row using the row index
+                    GridViewRow row = DSPReport.Rows[rowIndex];
+
+                    string _TabName = ((Label)row.FindControl("lblSCHEMECODE")).Text;  // Example field
+                    string Link = $"MotiTabName.aspx?TabName={HttpUtility.UrlEncode(_TabName)}";
+                    //Response.Redirect(Link, false);
+                    //Context.ApplicationInstance.CompleteRequest(); // Prevents ThreadAbortException
+                    string script = $"window.open('{Link}', '_blank');";
+                    ScriptManager.RegisterStartupScript(this, this.GetType(), "OpenNewTab", script, true);
+                }
+                else if (e.CommandName == "Download")
+                {
+                    int rowIndex = Convert.ToInt32(e.CommandArgument);
+                    GridViewRow row = DSPReport.Rows[rowIndex];
+                    string _TabName = ((Label)row.FindControl("lblSCHEMECODE")).Text;
+                    string _ClientCode = ((TextBox)row.FindControl("txtClientcode")).Text;
+                    DataSet dts = new DataSet();
+
+                    SqlParameter[] para = new SqlParameter[2];
+                    para[0] = new SqlParameter("@OPTION", "DSPEXCELINDI");
+                    para[1] = new SqlParameter("@SCHEMECODE", _TabName);
+
+                    dts = DBWrapper.ReturnDS(para, "proc_DSP");
+                    if (dts.Tables.Count > 0 && dts.Tables[0].Rows.Count > 0)
+                    {
+                        ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
+                        using (var package = new OfficeOpenXml.ExcelPackage()) // EPPlus Library
+                        {
+                            //ExcelWorksheet worksheet = package.Workbook.Worksheets.Add("Sheet1");
+                            //worksheet.Cells.LoadFromDataTable(dts.Tables[0], true); // Load data
+
+                            Response.Clear();
+                            Response.ContentType = "text/csv";
+                            Response.AddHeader("content-disposition", "attachment; filename=" + _TabName + "_" + _ClientCode + ".csv");
+                            Response.ContentEncoding = System.Text.Encoding.UTF8;
+
+                            StringBuilder csvBuilder = new StringBuilder();
+
+                            // Assuming your datatable is dts.Tables[0]
+                            DataTable dt = dts.Tables[0];
+
+                            // Add column headers
+                            for (int i = 0; i < dt.Columns.Count; i++)
+                            {
+                                csvBuilder.Append(dt.Columns[i].ColumnName);
+                                if (i < dt.Columns.Count - 1)
+                                    csvBuilder.Append(",");
+                            }
+                            csvBuilder.AppendLine();
+
+                            // Add rows
+                            foreach (DataRow rows in dt.Rows)
+                            {
+                                for (int i = 0; i < dt.Columns.Count; i++)
+                                {
+                                    var field = rows[i].ToString();
+
+                                    // Escape double quotes and commas if needed
+                                    if (field.Contains(",") || field.Contains("\"") || field.Contains("\n"))
+                                    {
+                                        field = "\"" + field.Replace("\"", "\"\"") + "\"";
+                                    }
+
+                                    csvBuilder.Append(field);
+                                    if (i < dt.Columns.Count - 1)
+                                        csvBuilder.Append(",");
+                                }
+                                csvBuilder.AppendLine();
+                            }
+
+                            Response.Write(csvBuilder.ToString());
+                            Response.Flush();
+                            Response.End();
+                        }
+                    }
+                    else
+                    {
+                        // Show message if no data found
+                        ScriptManager.RegisterStartupScript(this, GetType(), "alertMessage", "alert('No data found to export!');", true);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        protected void RowValueChanged(object sender, EventArgs e)
+        {
+            Control ctrl = (Control)sender;
+            GridViewRow row = (GridViewRow)ctrl.NamingContainer;
+
+            if (row != null)
+            {
+                // Get controls from row
+                Label lblSchemeCode = (Label)row.FindControl("lblSCHEMECODE");
+                DropDownList ddlBuySell = (DropDownList)row.FindControl("ddlBuySell");
+                TextBox txtClientCode = (TextBox)row.FindControl("txtClientcode");
+                TextBox txtNoofBaskets = (TextBox)row.FindControl("txtNoofBaskets");
+                Label lblQuantity = (Label)row.FindControl("lblQUANTITY");
+                Label lblInitialQUANTITY = (Label)row.FindControl("lblInitialQUANTITY");
+                TextBox lbltxtTradeInstruction = (TextBox)row.FindControl("txtTradeInstruction");
+
+                // Extract values
+                string schemeCode = lblSchemeCode.Text;
+                string buySell = ddlBuySell.SelectedValue;
+                string clientCode = txtClientCode.Text;
+                string TradeInstructions = lbltxtTradeInstruction.Text;
+                int noOfBaskets = int.TryParse(txtNoofBaskets.Text, out int parsedBaskets) ? parsedBaskets : 0;
+                //int initialQuantity = GetInitialQuantityForRow(Convert.ToInt32(lblInitialQUANTITY.Text));
+                decimal initialQuantity = GetInitialQuantityForRow(Convert.ToDecimal(lblInitialQUANTITY.Text));
+                decimal updatedQuantity = initialQuantity * noOfBaskets;
+                lblQuantity.Text = updatedQuantity.ToString();
+
+                // Save to database
+                SqlParameter[] para = new SqlParameter[7];
+                para[0] = new SqlParameter("@OPTION", "UPDATEDSPMAIN");
+                para[1] = new SqlParameter("@CLIENTCODE", clientCode);
+                para[2] = new SqlParameter("@BUYSELL", buySell);
+                para[3] = new SqlParameter("@QUANTITY", lblQuantity.Text);
+                para[4] = new SqlParameter("@SCHEMECODE", schemeCode);
+                para[5] = new SqlParameter("@NOOFBASKETS", noOfBaskets);
+                para[6] = new SqlParameter("@TradeInstructions", TradeInstructions);
+
+                var res = DBWrapper.ReturnDS(para, "proc_DSP");
+                ShowGrid();
+            }
+        }
+        private decimal GetInitialQuantityForRow(decimal rowIndex)
+        {
+
+            return rowIndex;
         }
     }
 }

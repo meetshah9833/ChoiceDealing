@@ -4,18 +4,16 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using static ChoiceDealing.MotiAMCBasketFile;
 
 namespace ChoiceDealing
 {
-    public partial class DSP : System.Web.UI.Page
+    public partial class Birla : System.Web.UI.Page
     {
         protected void Page_Load(object sender, EventArgs e)
         {
@@ -39,9 +37,9 @@ namespace ChoiceDealing
                 dts = DBWrapper.ReturnDS(para, "proc_DSP");
                 if (dts.Tables.Count > 0)
                 {
-                    DSPReport.DataSource = dts;
-                    DSPReport.DataBind();
-                    DSPReport.Visible = true;
+                    BirlaReport.DataSource = dts;
+                    BirlaReport.DataBind();
+                    BirlaReport.Visible = true;
                 }
             }
             catch (Exception ex)
@@ -84,14 +82,14 @@ namespace ChoiceDealing
                             // Add columns from header row (assumed to be row 1)
                             for (int col = 2; col <= maxColumns + 1; col++)
                             {
-                                var columnName = worksheet.Cells[1, col].Text.Trim();
+                                var columnName = worksheet.Cells[3, col].Text.Trim();
                                 formattedTable.Columns.Add(string.IsNullOrEmpty(columnName) ? $"Column{col}" : columnName);
                             }
 
-                            for (int row = 2; row <= rowCount; row++)
+                            for (int row = 4; row <= rowCount; row++)
                             {
                                 if (string.IsNullOrWhiteSpace(worksheet.Cells[row, 2].Text))
-                                    break;
+                                    break;      
 
                                 DataRow newRow = formattedTable.NewRow();
                                 newRow["TabName"] = sheetName;
@@ -122,14 +120,14 @@ namespace ChoiceDealing
                                     {
                                         BASKET_ID = sheetName,
                                         BASKET_DATE = formattedTable.Columns.Count > 1 ? row[1]?.ToString() : null,
-                                        SYMBOL = formattedTable.Columns.Count >2? row[2]?.ToString() : null,
-                                        ISIN = formattedTable.Columns.Count>3? row[3]?.ToString() : null,
-                                        SECURITY = formattedTable.Columns.Count>4? row[4]?.ToString() : null,
-                                        QUANTITY = formattedTable.Columns.Count>5? row[5]?.ToString() : null,
-                                        PRICE = formattedTable.Columns.Count>6? row[6]?.ToString() : null,
-                                        VALUE = formattedTable.Columns.Count>7? row[7]?.ToString() : null
+                                        SYMBOL = formattedTable.Columns.Count > 2 ? row[2]?.ToString() : null,
+                                        ISIN = formattedTable.Columns.Count > 3 ? row[3]?.ToString() : null,
+                                        SECURITY = formattedTable.Columns.Count > 4 ? row[4]?.ToString() : null,
+                                        QUANTITY = formattedTable.Columns.Count > 5 ? row[5]?.ToString() : null,
+                                        PRICE = formattedTable.Columns.Count > 6 ? row[6]?.ToString() : null,
+                                        VALUE = formattedTable.Columns.Count > 7 ? row[7]?.ToString() : null
                                     };
-                                   
+
                                     DataTable datatable2 = InstiTabs(dSPBasket);
                                 }
 
@@ -154,7 +152,7 @@ namespace ChoiceDealing
                                 };
                                 DataTable table1 = INSTIMain(main);
                             }
-                        
+
                         }
                     }
 
@@ -166,7 +164,7 @@ namespace ChoiceDealing
                     lblMessage.Text = "Please select a file to upload.";
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 lblMessage.Text = "Error: " + ex.Message;
             }
@@ -289,9 +287,9 @@ namespace ChoiceDealing
         public class DSPBasketValues
         {
             public string BASKET_ID { get; set; }
-            public string BASKET_DATE {  get; set; }
-            public string SYMBOL {  get; set; }
-            public string ISIN {  get; set; }
+            public string BASKET_DATE { get; set; }
+            public string SYMBOL { get; set; }
+            public string ISIN { get; set; }
             public string SECURITY { get; set; }
 
             public string QUANTITY { get; set; }
@@ -303,17 +301,17 @@ namespace ChoiceDealing
 
         public class DSPSchemes
         {
-            public string SchemeCode {  get; set; }
-            public string BuySell {  get; set; }
-            public string ClientCode {  get; set; }
+            public string SchemeCode { get; set; }
+            public string BuySell { get; set; }
+            public string ClientCode { get; set; }
             public int noofBaskets { get; set; }
-            public string TRADEINSTRUCTIONS { get; set; } 
+            public string TRADEINSTRUCTIONS { get; set; }
             public string INITIALQUANTITY { get; set; }
             public string Qty { get; set; }
             public string Linecount { get; set; }
         }
 
-        protected void DSPReport_RowDataBound(object sender, GridViewRowEventArgs e)
+        protected void BirlaReport_RowDataBound(object sender, GridViewRowEventArgs e)
         {
             if (e.Row.RowType == DataControlRowType.DataRow)
             {
@@ -344,7 +342,7 @@ namespace ChoiceDealing
             }
         }
 
-        protected void DSPReport_RowCommand(object sender, GridViewCommandEventArgs e)
+        protected void BirlaReport_RowCommand(object sender, GridViewCommandEventArgs e)
         {
             try
             {
@@ -354,7 +352,7 @@ namespace ChoiceDealing
                     int rowIndex = Convert.ToInt32(e.CommandArgument);
 
                     // Access the correct row using the row index
-                    GridViewRow row = DSPReport.Rows[rowIndex];
+                    GridViewRow row = BirlaReport.Rows[rowIndex];
 
                     string _TabName = ((Label)row.FindControl("lblSCHEMECODE")).Text;  // Example field
                     string Link = $"MotiTabName.aspx?TabName={HttpUtility.UrlEncode(_TabName)}";
@@ -366,7 +364,7 @@ namespace ChoiceDealing
                 else if (e.CommandName == "Download")
                 {
                     int rowIndex = Convert.ToInt32(e.CommandArgument);
-                    GridViewRow row = DSPReport.Rows[rowIndex];
+                    GridViewRow row = BirlaReport.Rows[rowIndex];
                     string _TabName = ((Label)row.FindControl("lblSCHEMECODE")).Text;
                     string _ClientCode = ((TextBox)row.FindControl("txtClientcode")).Text;
                     DataSet dts = new DataSet();

@@ -66,32 +66,54 @@ namespace ChoiceDealing
 
         public static DataSet ReturnDS(SqlParameter[] para, string ProcName)
         {
-            SqlConnection conn = GetNewSqlConnection();
-            SqlCommand cmd = new SqlCommand();
             DataSet dts = new DataSet();
-            SqlDataAdapter da = new SqlDataAdapter(cmd);
 
-            try
+            // defensive: ensure ProcName provided
+            if (string.IsNullOrWhiteSpace(ProcName))
+                throw new ArgumentException("ProcName is required.", nameof(ProcName));
+
+            using (SqlConnection conn = GetNewSqlConnection())
+            using (SqlCommand cmd = conn.CreateCommand())
             {
-                cmd.Connection = conn;
                 cmd.CommandType = CommandType.StoredProcedure;
-                cmd.CommandTimeout = 0;
                 cmd.CommandText = ProcName;
-                cmd.Parameters.AddRange(para);
-                da.Fill(dts);
+                cmd.CommandTimeout = 0;
+
+                if (para != null && para.Length > 0)
+                    cmd.Parameters.AddRange(para);
+
+                // Debug: log parameters (optional, remove in production)
+                try
+                {
+                    for (int i = 0; i < cmd.Parameters.Count; i++)
+                    {
+                        var p = cmd.Parameters[i];
+                        System.Diagnostics.Debug.WriteLine($"Param[{i}] {p.ParameterName} = {(p.Value ?? "NULL")} (DbType={p.DbType})");
+                    }
+                }
+                catch { /* ignore logging errors */ }
+
+                using (SqlDataAdapter da = new SqlDataAdapter(cmd))
+                {
+                    // Ensure connection is available; SqlDataAdapter.Fill will open if closed,
+                    // but opening explicitly gives clearer error messages and easier debugging.
+                    if (conn.State != ConnectionState.Open)
+                        conn.Open();
+
+                    da.Fill(dts);
+
+                    // Debug: log how many tables/rows we got (optional)
+                    System.Diagnostics.Debug.WriteLine($"ReturnDS: tables = {dts.Tables.Count}");
+                    for (int t = 0; t < dts.Tables.Count; t++)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"ReturnDS: table[{t}] rows = {dts.Tables[t].Rows.Count}");
+                    }
+                }
             }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-            finally
-            {
-                if (conn.State != System.Data.ConnectionState.Closed)
-                    conn.Close();
-                conn.Dispose();
-            }
+
             return dts;
         }
+
 
         public static DataSet ReturnDS(string ProcName)
         {

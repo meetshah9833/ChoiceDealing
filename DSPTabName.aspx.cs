@@ -1,0 +1,50 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Data.SqlClient;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+
+namespace ChoiceDealing
+{
+    public partial class DSPTabName : System.Web.UI.Page
+    {
+        protected void Page_Load(object sender, EventArgs e)
+        {
+            if (!IsPostBack)
+            {
+                string tabName = Request.QueryString["TabName"];
+                if (!string.IsNullOrEmpty(tabName))
+                {
+                    BindGrid(tabName);
+                }
+            }
+        }
+
+        private void BindGrid(string tabName)
+        {
+            try
+            {
+                DataSet dts = new DataSet();
+
+                SqlParameter[] para = new SqlParameter[2];
+                para[0] = new SqlParameter("@OPTION", "TABNAMES");
+                para[1] = new SqlParameter("@SCHEMECODE", tabName);
+
+                dts = DBWrapper.ReturnDS(para, "proc_DSP");
+                if (dts.Tables.Count > 0)
+                {
+                    DSPTabNameReport.DataSource = dts;
+                    DSPTabNameReport.DataBind();
+                    DSPTabNameReport.Visible = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+    }
+}

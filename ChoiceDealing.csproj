@@ -159,6 +159,7 @@
     <Content Include="Content\Site.css" />
     <Content Include="Default.aspx" />
     <Content Include="DSP.aspx" />
+    <Content Include="DSPTabName.aspx" />
     <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
     <Content Include="MotiAMCBasketFile.aspx" />
@@ -262,6 +263,13 @@
     </Compile>
     <Compile Include="DSP.aspx.designer.cs">
       <DependentUpon>DSP.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="DSPTabName.aspx.cs">
+      <DependentUpon>DSPTabName.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="DSPTabName.aspx.designer.cs">
+      <DependentUpon>DSPTabName.aspx</DependentUpon>
     </Compile>
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>

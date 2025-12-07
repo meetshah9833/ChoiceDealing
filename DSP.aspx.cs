@@ -138,7 +138,7 @@ namespace ChoiceDealing
                                 decimal totalUnits = 0;
                                 foreach (DataRow row in formattedTable.Rows)
                                 {
-                                    if (formattedTable.Columns.Count > 6 && decimal.TryParse(row[6]?.ToString(), out decimal unit))
+                                    if (formattedTable.Columns.Count > 6 && decimal.TryParse(row[5]?.ToString(), out decimal unit))
                                     {
                                         totalUnits += unit;
                                     }
@@ -357,7 +357,7 @@ namespace ChoiceDealing
                     GridViewRow row = DSPReport.Rows[rowIndex];
 
                     string _TabName = ((Label)row.FindControl("lblSCHEMECODE")).Text;  // Example field
-                    string Link = $"MotiTabName.aspx?TabName={HttpUtility.UrlEncode(_TabName)}";
+                    string Link = $"DSPTabName.aspx?TabName={HttpUtility.UrlEncode(_TabName)}";
                     //Response.Redirect(Link, false);
                     //Context.ApplicationInstance.CompleteRequest(); // Prevents ThreadAbortException
                     string script = $"window.open('{Link}', '_blank');";

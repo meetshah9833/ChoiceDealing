@@ -32,9 +32,9 @@ namespace ChoiceDealing
                 DataSet dts = new DataSet();
 
                 SqlParameter[] para = new SqlParameter[1];
-                para[0] = new SqlParameter("@OPTION", "DSPVIEW");
+                para[0] = new SqlParameter("@OPTION", "BIRLAVIEW");
 
-                dts = DBWrapper.ReturnDS(para, "proc_DSP");
+                dts = DBWrapper.ReturnDS(para, "proc_BIRLA");
                 if (dts.Tables.Count > 0)
                 {
                     BirlaReport.DataSource = dts;
@@ -109,8 +109,8 @@ namespace ChoiceDealing
                                     connection.Open();
                                     if (worksheet.Index == 0)
                                     {
-                                        new SqlCommand("TRUNCATE TABLE tbl_DSPBASKETVALUES", connection).ExecuteNonQuery();
-                                        new SqlCommand("TRUNCATE TABLE tbl_DSPSCHEMES", connection).ExecuteNonQuery();
+                                        new SqlCommand("TRUNCATE TABLE tbl_BIRLABASKETVALUES", connection).ExecuteNonQuery();
+                                        new SqlCommand("TRUNCATE TABLE tbl_BIRLASCHEMES", connection).ExecuteNonQuery();
                                     }
                                 }
 
@@ -119,13 +119,13 @@ namespace ChoiceDealing
                                     DSPBasketValues dSPBasket = new DSPBasketValues
                                     {
                                         BASKET_ID = sheetName,
-                                        BASKET_DATE = formattedTable.Columns.Count > 1 ? row[1]?.ToString() : null,
-                                        SYMBOL = formattedTable.Columns.Count > 2 ? row[2]?.ToString() : null,
-                                        ISIN = formattedTable.Columns.Count > 3 ? row[3]?.ToString() : null,
-                                        SECURITY = formattedTable.Columns.Count > 4 ? row[4]?.ToString() : null,
-                                        QUANTITY = formattedTable.Columns.Count > 5 ? row[5]?.ToString() : null,
-                                        PRICE = formattedTable.Columns.Count > 6 ? row[6]?.ToString() : null,
-                                        VALUE = formattedTable.Columns.Count > 7 ? row[7]?.ToString() : null
+                                        BASKET_DATE = DateTime.Now.ToString(),
+                                        SYMBOL = formattedTable.Columns.Count > 1 ? row[1]?.ToString() : null,
+                                        ISIN = formattedTable.Columns.Count > 1 ? row[1]?.ToString() : null,
+                                        SECURITY = formattedTable.Columns.Count > 2 ? row[2]?.ToString() : null,
+                                        QUANTITY = formattedTable.Columns.Count > 3 ? row[3]?.ToString() : null,
+                                        PRICE = formattedTable.Columns.Count > 4 ? row[4]?.ToString() : null,
+                                        VALUE = formattedTable.Columns.Count > 5 ? row[5]?.ToString() : null
                                     };
 
                                     DataTable datatable2 = InstiTabs(dSPBasket);
@@ -136,7 +136,7 @@ namespace ChoiceDealing
                                 decimal totalUnits = 0;
                                 foreach (DataRow row in formattedTable.Rows)
                                 {
-                                    if (formattedTable.Columns.Count > 6 && decimal.TryParse(row[6]?.ToString(), out decimal unit))
+                                    if (formattedTable.Columns.Count > 6 && decimal.TryParse(row[3]?.ToString(), out decimal unit))
                                     {
                                         totalUnits += unit;
                                     }
@@ -172,8 +172,8 @@ namespace ChoiceDealing
 
         public DataTable InstiTabs(DSPBasketValues Inputmodel)
         {
-            SqlCommand command = new SqlCommand("proc_DSP");
-            command.Parameters.Add("@Option", SqlDbType.VarChar).Value = "INSERTDSP";
+            SqlCommand command = new SqlCommand("proc_BIRLA");
+            command.Parameters.Add("@Option", SqlDbType.VarChar).Value = "INSERTBIRLA";
             command.Parameters.Add("@BASKET_ID", SqlDbType.VarChar).Value = Inputmodel.BASKET_ID;
             command.Parameters.Add("@BASKET_DATE", SqlDbType.VarChar).Value = Inputmodel.BASKET_DATE;
             command.Parameters.Add("@SYMBOL", SqlDbType.VarChar).Value = Inputmodel.SYMBOL;
@@ -189,7 +189,7 @@ namespace ChoiceDealing
         }
         public DataTable INSTIMain(DSPSchemes Inputmodel)
         {
-            SqlCommand command = new SqlCommand("proc_DSP");
+            SqlCommand command = new SqlCommand("proc_BIRLA");
             command.Parameters.Add("@Option", SqlDbType.VarChar).Value = "MAINPAGE";
             command.Parameters.Add("@SCHEMECODE", SqlDbType.VarChar).Value = Inputmodel.SchemeCode;
             command.Parameters.Add("@BUYSELL", SqlDbType.VarChar).Value = Inputmodel.BuySell;
@@ -213,7 +213,7 @@ namespace ChoiceDealing
                 SqlParameter[] para = new SqlParameter[1];
                 para[0] = new SqlParameter("@Option", "VIEW");
 
-                dts = DBWrapper.ReturnDS(para, "proc_DSP");
+                dts = DBWrapper.ReturnDS(para, "proc_BIRLA");
                 if (dts.Tables.Count > 0 && dts.Tables[0].Rows.Count > 0)
                 {
                     ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
@@ -320,7 +320,7 @@ namespace ChoiceDealing
                 TextBox txtNoofBaskets = (TextBox)e.Row.FindControl("txtNoofBaskets");
 
                 // Assuming SCHEMENAME is the second column (index 1), or you can use DataBinder
-                string buySellValue = DataBinder.Eval(e.Row.DataItem, "SCHEMENAME")?.ToString();
+                string buySellValue = DataBinder.Eval(e.Row.DataItem, "SCHEMECODE")?.ToString();
 
                 if (!string.IsNullOrEmpty(buySellValue) && (buySellValue == "B" || buySellValue == "S"))
                 {
@@ -355,7 +355,7 @@ namespace ChoiceDealing
                     GridViewRow row = BirlaReport.Rows[rowIndex];
 
                     string _TabName = ((Label)row.FindControl("lblSCHEMECODE")).Text;  // Example field
-                    string Link = $"MotiTabName.aspx?TabName={HttpUtility.UrlEncode(_TabName)}";
+                    string Link = $"BirlaTabName.aspx?TabName={HttpUtility.UrlEncode(_TabName)}";
                     //Response.Redirect(Link, false);
                     //Context.ApplicationInstance.CompleteRequest(); // Prevents ThreadAbortException
                     string script = $"window.open('{Link}', '_blank');";
@@ -370,10 +370,10 @@ namespace ChoiceDealing
                     DataSet dts = new DataSet();
 
                     SqlParameter[] para = new SqlParameter[2];
-                    para[0] = new SqlParameter("@OPTION", "DSPEXCELINDI");
+                    para[0] = new SqlParameter("@OPTION", "BIRLAEXCELINDI");
                     para[1] = new SqlParameter("@SCHEMECODE", _TabName);
 
-                    dts = DBWrapper.ReturnDS(para, "proc_DSP");
+                    dts = DBWrapper.ReturnDS(para, "proc_BIRLA");
                     if (dts.Tables.Count > 0 && dts.Tables[0].Rows.Count > 0)
                     {
                         ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
@@ -468,7 +468,7 @@ namespace ChoiceDealing
 
                 // Save to database
                 SqlParameter[] para = new SqlParameter[7];
-                para[0] = new SqlParameter("@OPTION", "UPDATEDSPMAIN");
+                para[0] = new SqlParameter("@OPTION", "UPDATEBIRLAMAIN");
                 para[1] = new SqlParameter("@CLIENTCODE", clientCode);
                 para[2] = new SqlParameter("@BUYSELL", buySell);
                 para[3] = new SqlParameter("@QUANTITY", lblQuantity.Text);
@@ -477,7 +477,7 @@ namespace ChoiceDealing
                 para[5] = new SqlParameter("@NOOFBASKETS", noOfBaskets);
                 para[6] = new SqlParameter("@TradeInstructions", TradeInstructions);
 
-                var res = DBWrapper.ReturnDS(para, "proc_DSP");
+                var res = DBWrapper.ReturnDS(para, "proc_BIRLA");
                 ShowGrid();
             }
         }

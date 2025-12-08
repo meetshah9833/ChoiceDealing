@@ -81,7 +81,7 @@
                             <asp:TemplateField HeaderText="NoofBaskets" HeaderStyle-CssClass="GridTextCenter" ItemStyle-CssClass="GridTextCenter">
                                 <itemtemplate>
                                     <asp:TextBox ID="txtNoofBaskets" runat="server" CssClass="noofBaskets"
-                                        Text='<%# Eval("NoofBaskets") %>' AutoPostBack="true" OnTextChanged="RowValueChanged">
+                                        Text='<%# Eval("NOOFBASKETS") %>' AutoPostBack="true" OnTextChanged="RowValueChanged">
                                     </asp:TextBox>
                                 </itemtemplate>
                             </asp:TemplateField>
@@ -94,7 +94,7 @@
                             </asp:TemplateField>
                             <asp:TemplateField HeaderText="Initial QUANTITY" HeaderStyle-CssClass="GridTextCenter" ItemStyle-CssClass="GridTextCenter">
                                 <itemtemplate>
-                                    <asp:Label ID="lblInitialQUANTITY" runat="server" ToolTip="InitialQUANTITY" Text='<% #Bind("Transactions") %>'></asp:Label>
+                                    <asp:Label ID="lblInitialQUANTITY" runat="server" ToolTip="InitialQUANTITY" Text='<% #Bind("INITIALQUANTITY") %>'></asp:Label>
                                 </itemtemplate>
                             </asp:TemplateField>
                             <asp:TemplateField HeaderText="QUANTITY" HeaderStyle-CssClass="GridTextCenter" ItemStyle-CssClass="GridTextCenter">

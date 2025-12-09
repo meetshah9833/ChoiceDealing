@@ -1,9 +1,9 @@
 ﻿<%@ Page Language="C#" AutoEventWireup="true" MasterPageFile="~/Site.Master" CodeBehind="BirlaTabName.aspx.cs" Inherits="ChoiceDealing.BirlaTabName" %>
 
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
-    <div class="adjusttop container-fluid BgGridCss" style="width: 100%; height: 100vh; overflow-y: auto">
-                    <asp:GridView ID="BirlaTabNameReport" runat="server" AutoGenerateColumns="false" CssClass="LabelTextCSS table-bordered-grid"
-                        CellPadding="6" CellSpacing="0" BorderStyle="Solid" BorderWidth="1px" BorderColor="Black"
+    <div class="adjusttop container-fluid BgGridCss" style="width: 100%; height: 100%; overflow-y: auto">
+                    <asp:GridView ID="BirlaTabNameReport" runat="server" AutoGenerateColumns="false" CssClass="LabelTextCSS"
+                        CellPadding="4" GridLines="Both"
                         Width="100%" Height="100%">
                         <HeaderStyle CssClass="HeaderCSS" />
                         <Columns>
@@ -56,4 +56,15 @@
                         <AlternatingRowStyle CssClass="AlternativeRowCss" />
                     </asp:GridView>
                 </div>
+        <style>
+        .LabelTextCSS td, .LabelTextCSS th {
+    border-right: 2px solid #ccc;
+    border-bottom: 2px solid #ccc;
+}
+
+.LabelTextCSS {
+    border-collapse: collapse;
+}
+
+    </style>
     </asp:Content>

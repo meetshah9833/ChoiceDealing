@@ -225,7 +225,7 @@ namespace ChoiceDealing
                         Response.Clear();
                         //Response.ContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
                         Response.ContentType = "text/csv";
-                        Response.AddHeader("content-disposition", "attachment; filename=DSPFile.csv");
+                        Response.AddHeader("content-disposition", "attachment; filename=BirlaFile.csv");
 
                         using (var stream = new MemoryStream())
                         {

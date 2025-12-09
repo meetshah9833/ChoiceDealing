@@ -52,7 +52,7 @@
                     </div>
                 </div>
                 <div class="adjusttop container-fluid BgGridCss" style="width: 100%">
-                    <asp:GridView ID="BirlaReport" runat="server" AutoGenerateColumns="false"
+                    <asp:GridView ID="BirlaReport" runat="server" AutoGenerateColumns="false" GridLines="Both" CellPadding="4"
                         OnRowDataBound="BirlaReport_RowDataBound"
                         OnRowCommand="BirlaReport_RowCommand" CssClass="LabelTextCSS" Width="100%" Height="100%" Font-Size="15px">
                         <headerstyle cssclass="HeaderCSS" font-size="15px" />
@@ -122,4 +122,16 @@
             </div>
         </div>
     </div>
+    <style>
+        .LabelTextCSS td, .LabelTextCSS th {
+    border-right: 2px solid #ccc;
+    border-bottom: 2px solid #ccc;
+}
+
+.LabelTextCSS {
+    border-collapse: collapse;
+}
+
+    </style>
 </asp:Content>
+

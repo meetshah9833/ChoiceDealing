@@ -53,7 +53,7 @@
                 </div>
                 <div class="adjusttop container-fluid BgGridCss" style="width: 100%">
                     <asp:GridView ID="DSPReport" runat="server" AutoGenerateColumns="false"
-                        OnRowDataBound="DSPReport_RowDataBound"
+                        OnRowDataBound="DSPReport_RowDataBound" GridLines="Both" CellPadding="4"
                         OnRowCommand="DSPReport_RowCommand" CssClass="LabelTextCSS" Width="100%" Height="100%" Font-Size="15px">
                         <HeaderStyle CssClass="HeaderCSS" Font-Size="15px" />
                         <Columns>
@@ -119,4 +119,15 @@
             </div>
         </div>
     </div>
+        <style>
+        .LabelTextCSS td, .LabelTextCSS th {
+    border-right: 2px solid #ccc;
+    border-bottom: 2px solid #ccc;
+}
+
+.LabelTextCSS {
+    border-collapse: collapse;
+}
+
+    </style>
 </asp:Content>

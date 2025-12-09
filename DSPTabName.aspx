@@ -1,8 +1,8 @@
 ﻿<%@ Page Language="C#" AutoEventWireup="true" MasterPageFile="~/Site.Master" CodeBehind="DSPTabName.aspx.cs" Inherits="ChoiceDealing.DSPTabName" %>
 
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
-    <div class="adjusttop container-fluid BgGridCss" style="width: 100%; height: 100vh; overflow-y: auto">
-                    <asp:GridView ID="DSPTabNameReport" runat="server" AutoGenerateColumns="false" CssClass="LabelTextCSS" Width="100%" Height="100%">
+    <div class="adjusttop container-fluid BgGridCss" style="width: 100%; height: 100%; overflow-y: auto">
+                    <asp:GridView ID="DSPTabNameReport" runat="server" AutoGenerateColumns="false" CssClass="LabelTextCSS" GridLines="Both" CellPadding="4" Width="100%" Height="100%">
                         <HeaderStyle CssClass="HeaderCSS" />
                         <Columns>
                             <asp:TemplateField HeaderText="TABNAME" HeaderStyle-CssClass="GridTextCenter" ItemStyle-CssClass="GridTextCenter">
@@ -54,4 +54,15 @@
                         <AlternatingRowStyle CssClass="AlternativeRowCss" />
                     </asp:GridView>
                 </div>
+        <style>
+        .LabelTextCSS td, .LabelTextCSS th {
+    border-right: 2px solid #ccc;
+    border-bottom: 2px solid #ccc;
+}
+
+.LabelTextCSS {
+    border-collapse: collapse;
+}
+
+    </style>
     </asp:Content>

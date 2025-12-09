@@ -54,7 +54,7 @@
                 </div>
                 <div class="adjusttop container-fluid BgGridCss" style="width: 100%">
                     <asp:GridView ID="Moti_AMCReport" runat="server" AutoGenerateColumns="false" 
-                        OnRowDataBound="Moti_AMCReport_RowDataBound"
+                        OnRowDataBound="Moti_AMCReport_RowDataBound" GridLines="Both" CellPadding="4"
                         OnRowCommand="Moti_AMCReport_RowCommand" CssClass="LabelTextCSS" Width="100%" Height="100%" Font-Size="15px">
                         <HeaderStyle CssClass="HeaderCSS" Font-Size="15px"/>
                         <Columns>
@@ -120,5 +120,15 @@
             </div>
         </div>
     </div>
+        <style>
+        .LabelTextCSS td, .LabelTextCSS th {
+    border-right: 2px solid #ccc;
+    border-bottom: 2px solid #ccc;
+}
 
+.LabelTextCSS {
+    border-collapse: collapse;
+}
+
+    </style>
     </asp:Content>

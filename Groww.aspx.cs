@@ -228,6 +228,72 @@ namespace ChoiceDealing
             }
         }
 
+        protected void btnAllinOne_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (fileUpload.HasFiles)
+                {
+                    ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+
+                    string outputFile = Server.MapPath("~/FileUploads/CombinedExcel.xlsx");
+
+                    using (ExcelPackage combinedPackage = new ExcelPackage())
+                    {
+                        foreach (HttpPostedFile postedFile in fileUpload.PostedFiles)
+                        {
+                            string fileName = Path.GetFileNameWithoutExtension(postedFile.FileName);
+                            string filePath = Server.MapPath("~/FileUploads/" + postedFile.FileName);
+
+                            // Save uploaded file temporarily
+                            postedFile.SaveAs(filePath);
+
+                            using (ExcelPackage sourcePackage = new ExcelPackage(new FileInfo(filePath)))
+                            {
+                                var sourceSheet = sourcePackage.Workbook.Worksheets[0];
+
+                                if (sourceSheet == null || sourceSheet.Dimension == null)
+                                    continue;
+
+                                // Create new sheet in combined file
+                                var newSheet = combinedPackage.Workbook.Worksheets.Add(fileName);
+
+                                int rowCount = sourceSheet.Dimension.End.Row;
+                                int colCount = sourceSheet.Dimension.End.Column;
+
+                                for (int row = 1; row <= rowCount; row++)
+                                {
+                                    for (int col = 1; col <= colCount; col++)
+                                    {
+                                        newSheet.Cells[row, col].Value = sourceSheet.Cells[row, col].Value;
+                                    }
+                                }
+                            }
+
+                            // Delete temp file
+                            File.Delete(filePath);
+                        }
+
+                        // Save combined workbook
+                        FileInfo output = new FileInfo(outputFile);
+                        if (output.Exists)
+                            output.Delete();
+
+                        combinedPackage.SaveAs(output);
+                    }
+
+                    lblMessage.Text = "All files merged successfully!";
+                }
+                else
+                {
+                    lblMessage.Text = "Please select files to upload.";
+                }
+            }
+            catch (Exception ex)
+            {
+                lblMessage.Text = "Error: " + ex.Message;
+            }
+        }
         public DataTable InstiTabs(Instireminagtabs Inputmodel)
         {
             SqlCommand command = new SqlCommand("usp_GrowEXCEL");

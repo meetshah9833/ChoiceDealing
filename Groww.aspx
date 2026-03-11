@@ -31,6 +31,8 @@
                                     <asp:Label ID="lblMessage" runat="server" CssClass="text-info"></asp:Label>
                                 </td>
                                 <td class="text-right" colspan="4">
+                                    <asp:Button ID="btnAllInOne" runat="server" Text="All in one" CssClass="btn btn-primary"
+                                        OnClick="btnAllinOne_Click" ValidationGroup="Date" />
                                     <asp:Button ID="btnView" runat="server" Text="View" CssClass="btn btn-primary"
                                         OnClick="btnView_Click" ValidationGroup="Date" />
                                     <asp:Button ID="btnDownload" runat="server" Text="Download" CssClass="btn btn-primary"

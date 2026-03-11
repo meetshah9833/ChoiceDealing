@@ -236,8 +236,6 @@ namespace ChoiceDealing
                 {
                     ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 
-                    string outputFile = Server.MapPath("~/FileUploads/CombinedExcel.xlsx");
-
                     using (ExcelPackage combinedPackage = new ExcelPackage())
                     {
                         foreach (HttpPostedFile postedFile in fileUpload.PostedFiles)
@@ -245,7 +243,7 @@ namespace ChoiceDealing
                             string fileName = Path.GetFileNameWithoutExtension(postedFile.FileName);
                             string filePath = Server.MapPath("~/FileUploads/" + postedFile.FileName);
 
-                            // Save uploaded file temporarily
+                            // Save temporarily
                             postedFile.SaveAs(filePath);
 
                             using (ExcelPackage sourcePackage = new ExcelPackage(new FileInfo(filePath)))
@@ -255,7 +253,6 @@ namespace ChoiceDealing
                                 if (sourceSheet == null || sourceSheet.Dimension == null)
                                     continue;
 
-                                // Create new sheet in combined file
                                 var newSheet = combinedPackage.Workbook.Worksheets.Add(fileName);
 
                                 int rowCount = sourceSheet.Dimension.End.Row;
@@ -270,19 +267,20 @@ namespace ChoiceDealing
                                 }
                             }
 
-                            // Delete temp file
                             File.Delete(filePath);
                         }
 
-                        // Save combined workbook
-                        FileInfo output = new FileInfo(outputFile);
-                        if (output.Exists)
-                            output.Delete();
+                        // Send file to browser
+                        byte[] fileBytes = combinedPackage.GetAsByteArray();
 
-                        combinedPackage.SaveAs(output);
+                        Response.Clear();
+                        Response.Buffer = true;
+                        Response.ContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+                        Response.AddHeader("content-disposition", "attachment; filename=CombinedExcel.xlsx");
+                        Response.BinaryWrite(fileBytes);
+                        Response.Flush();
+                        Response.End();
                     }
-
-                    lblMessage.Text = "All files merged successfully!";
                 }
                 else
                 {

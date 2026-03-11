@@ -163,6 +163,8 @@
     <Content Include="DSPTabName.aspx" />
     <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
+    <Content Include="Groww.aspx" />
+    <Content Include="GrowwTabName.aspx" />
     <Content Include="MotiAMCBasketFile.aspx" />
     <Content Include="MotiTabName.aspx" />
     <Content Include="Scripts\bootstrap.bundle.js" />
@@ -281,6 +283,20 @@
     </Compile>
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
+    </Compile>
+    <Compile Include="Groww.aspx.cs">
+      <DependentUpon>Groww.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Groww.aspx.designer.cs">
+      <DependentUpon>Groww.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GrowwTabName.aspx.cs">
+      <DependentUpon>GrowwTabName.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GrowwTabName.aspx.designer.cs">
+      <DependentUpon>GrowwTabName.aspx</DependentUpon>
     </Compile>
     <Compile Include="MotiAMCBasketFile.aspx.cs">
       <DependentUpon>MotiAMCBasketFile.aspx</DependentUpon>

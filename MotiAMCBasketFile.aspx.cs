@@ -592,10 +592,11 @@ namespace ChoiceDealing
                                     var field = rows[i].ToString();
 
                                     // Escape double quotes and commas if needed
-                                    if (field.Contains(",") || field.Contains("\"") || field.Contains("\n"))
-                                    {
-                                        field = "\"" + field.Replace("\"", "\"\"") + "\"";
-                                    }
+                                    //if (field.Contains(",") || field.Contains("\"") || field.Contains("\n"))
+                                    //{
+                                    //    field = "\"" + field.Replace("\"", "\"\"") + "\"";
+                                    //}
+                                    field = "=\"" + field + "\"";
 
                                     csvBuilder.Append(field);
                                     if (i < dt.Columns.Count - 1)
